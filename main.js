@@ -57,20 +57,41 @@ async function loadGLTFLoader() {
     
     const loader = new GLTFLoader();
     
+    console.log('Intentando cargar Fox.glb...');
+    
     loader.load(
       './Fox.glb',
       function (gltf) {
+        console.log('¡ÉXITO! Fox.glb cargado correctamente:', gltf);
         foxModel = gltf.scene;
-        console.log('Zorro cargado correctamente');
         foxModel.scale.set(0.5, 0.5, 0.5);
+        console.log('Modelo del zorro listo para usar');
       },
       function (progress) {
-        console.log('Cargando zorro...', Math.round((progress.loaded / progress.total) * 100) + '%');
+        console.log('Progreso carga Fox.glb:', Math.round((progress.loaded / progress.total) * 100) + '%');
       },
       function (error) {
-        console.error('Error cargando el zorro:', error);
-        // Si falla, crear un zorro simple con geometrías básicas
-        createSimpleFox();
+        console.error('ERROR cargando Fox.glb:', error);
+        console.error('Detalles del error:', error.message || error);
+        
+        // Probar otras rutas posibles
+        console.log('Probando ruta alternativa: Fox.glb (sin ./)');
+        loader.load(
+          'Fox.glb',
+          function (gltf) {
+            console.log('¡ÉXITO con ruta alternativa!');
+            foxModel = gltf.scene;
+            foxModel.scale.set(0.5, 0.5, 0.5);
+          },
+          function (progress) {
+            console.log('Progreso ruta alternativa:', Math.round((progress.loaded / progress.total) * 100) + '%');
+          },
+          function (error2) {
+            console.error('También falló la ruta alternativa:', error2);
+            console.log('Creando zorro simple como fallback');
+            createSimpleFox();
+          }
+        );
       }
     );
   } catch (error) {
