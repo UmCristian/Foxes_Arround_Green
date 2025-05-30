@@ -112,19 +112,20 @@ foxGroup.add(body);
   foxGroup.add(rightInnerEar);
 
   // Cola
-  const tailGeometry = new THREE.ConeGeometry(0.12, 0.6, 8);
-  const tailMaterial = new THREE.MeshPhongMaterial({ color: 0xdd4400 });
-  const tail = new THREE.Mesh(tailGeometry, tailMaterial);
-  tail.position.set(0, 0.2, -0.45);
-  tail.rotation.x = Math.PI / 4;
-  foxGroup.add(tail);
+  // Cola
+const tailGeometry = new THREE.ConeGeometry(0.12, 0.6, 8);
+const tailMaterial = new THREE.MeshPhongMaterial({ color: 0xdd4400 });
+const tail = new THREE.Mesh(tailGeometry, tailMaterial);
+tail.position.set(0, 0.2, -0.45);
+tail.rotation.x = Math.PI / 4;
+foxGroup.add(tail);
 
-  // Punta de la cola más pequeña
-  const tailTipGeometry = new THREE.SphereGeometry(0.05, 8, 8);  // REDUCIDA de 0.08 a 0.05
-  const tailTipMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff });
-  const tailTip = new THREE.Mesh(tailTipGeometry, tailTipMaterial);
-  tailTip.position.set(0, 0.34, -0.68);  // ajustada levemente
-  foxGroup.add(tailTip);
+// Punta de la cola corregida
+const tailTipGeometry = new THREE.SphereGeometry(0.05, 8, 8);
+const tailTipMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff });
+const tailTip = new THREE.Mesh(tailTipGeometry, tailTipMaterial);
+tailTip.position.set(0, 0.48, -0.73);  // <- corregido aquí
+foxGroup.add(tailTip);
 
   // Patas
   const legGeometry = new THREE.CylinderGeometry(0.04, 0.04, 0.2);
