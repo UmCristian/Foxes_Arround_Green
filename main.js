@@ -6,7 +6,12 @@ let controller;
 let reticle;
 let hitTestSource = null;
 let hitTestSourceRequested = false;
+
 let foxModel = null;
+let rabbitModel = null;
+let birdModel = null;
+
+let currentModelFactory = createFox;
 
 init();
 animate();
@@ -14,76 +19,134 @@ animate();
 function init() {
   const container = document.createElement('div');
   document.body.appendChild(container);
-  
+
   scene = new THREE.Scene();
   camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 20);
-  
+
   renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.xr.enabled = true;
   container.appendChild(renderer.domElement);
-  
+
   document.body.appendChild(ARButton.createButton(renderer, { requiredFeatures: ['hit-test'] }));
-  
+
   const light = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 1);
   light.position.set(0.5, 1, 0.25);
   scene.add(light);
-  
+
   const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
   directionalLight.position.set(0, 1, 0);
   scene.add(directionalLight);
-  
+
   controller = renderer.xr.getController(0);
   controller.addEventListener('select', onSelect);
   scene.add(controller);
-  
+
   const geometry = new THREE.RingGeometry(0.1, 0.11, 32).rotateX(-Math.PI / 2);
   const material = new THREE.MeshBasicMaterial({ color: 0x0fff0f });
   reticle = new THREE.Mesh(geometry, material);
   reticle.matrixAutoUpdate = false;
   reticle.visible = false;
   scene.add(reticle);
-  
-  // Crear el zorro directamente
+
+  // Cargar modelos iniciales
   createFox();
+  createRabbit();
+  createBird();
 }
 
-function createFox() {
-  console.log('Creando zorro mejorado (con cuerpo alineado y punta de cola ajustada)');
+function onSelect() {
+  if (reticle.visible && currentModelFactory && currentModelFactory.model) {
+    const clone = currentModelFactory.model.clone();
+    clone.position.setFromMatrixPosition(reticle.matrix);
+    clone.quaternion.setFromRotationMatrix(reticle.matrix);
+    scene.add(clone);
+  }
+}
 
+function animate() {
+  renderer.setAnimationLoop(render);
+}
+
+function render(_, frame) {
+  if (frame) {
+    const referenceSpace = renderer.xr.getReferenceSpace();
+    const session = renderer.xr.getSession();
+
+    if (!hitTestSourceRequested) {
+      session.requestReferenceSpace('viewer').then(refSpace => {
+        session.requestHitTestSource({ space: refSpace }).then(source => {
+          hitTestSource = source;
+        });
+      });
+
+      session.addEventListener('end', () => {
+        hitTestSourceRequested = false;
+        hitTestSource = null;
+      });
+
+      hitTestSourceRequested = true;
+    }
+
+    if (hitTestSource) {
+      const hitTestResults = frame.getHitTestResults(hitTestSource);
+      if (hitTestResults.length) {
+        const hit = hitTestResults[0];
+        const pose = hit.getPose(referenceSpace);
+        reticle.visible = true;
+        reticle.matrix.fromArray(pose.transform.matrix);
+      } else {
+        reticle.visible = false;
+      }
+    }
+  }
+
+  renderer.render(scene, camera);
+}
+
+// ----- Selector de animales -----
+window.setAnimal = function (animal) {
+  switch (animal) {
+    case 'fox': currentModelFactory = createFox; break;
+    case 'rabbit': currentModelFactory = createRabbit; break;
+    case 'bird': currentModelFactory = createBird; break;
+  }
+};
+
+// ----- Zorro -----
+function createFox() {
   const foxGroup = new THREE.Group();
 
-  // Cuerpo cilíndrico alineado a lo largo (más delgado)
-const bodyGeometry = new THREE.CylinderGeometry(0.12, 0.15, 0.8, 16);
-const bodyMaterial = new THREE.MeshPhongMaterial({ color: 0xcc5500 });
-const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
-body.rotation.x = Math.PI / 2;
-body.position.set(0, 0.1, 0);
-foxGroup.add(body);
+  const body = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.12, 0.15, 0.8, 16),
+    new THREE.MeshPhongMaterial({ color: 0xcc5500 })
+  );
+  body.rotation.x = Math.PI / 2;
+  body.position.set(0, 0.1, 0);
+  foxGroup.add(body);
 
-
-  // Cabeza
-  const headGeometry = new THREE.BoxGeometry(0.25, 0.25, 0.3);
-  const head = new THREE.Mesh(headGeometry, bodyMaterial);
+  const head = new THREE.Mesh(
+    new THREE.BoxGeometry(0.25, 0.25, 0.3),
+    body.material
+  );
   head.position.set(0, 0.21, 0.42);
   foxGroup.add(head);
 
-  // Hocico
-  const snoutGeometry = new THREE.BoxGeometry(0.12, 0.1, 0.2);
-  const snoutMaterial = new THREE.MeshPhongMaterial({ color: 0xffddb3 });
-  const snout = new THREE.Mesh(snoutGeometry, snoutMaterial);
+  const snout = new THREE.Mesh(
+    new THREE.BoxGeometry(0.12, 0.1, 0.2),
+    new THREE.MeshPhongMaterial({ color: 0xffddb3 })
+  );
   snout.position.set(0, 0.19, 0.6);
   foxGroup.add(snout);
 
-  // Nariz
-  const noseGeometry = new THREE.SphereGeometry(0.025, 8, 8);
-  const noseMaterial = new THREE.MeshPhongMaterial({ color: 0x000000 });
-  const nose = new THREE.Mesh(noseGeometry, noseMaterial);
+  const nose = new THREE.Mesh(
+    new THREE.SphereGeometry(0.025, 8, 8),
+    new THREE.MeshPhongMaterial({ color: 0x000000 })
+  );
   nose.position.set(0, 0.2, 0.72);
   foxGroup.add(nose);
 
-  // Orejas
   const earGeometry = new THREE.ConeGeometry(0.08, 0.2, 6);
   const earMaterial = new THREE.MeshPhongMaterial({ color: 0xdd4400 });
 
@@ -97,125 +160,111 @@ foxGroup.add(body);
   rightEar.rotation.set(-0.5, 0, 0.2);
   foxGroup.add(rightEar);
 
-  // Interior de orejas
   const innerEarGeometry = new THREE.ConeGeometry(0.04, 0.12, 6);
   const innerEarMaterial = new THREE.MeshPhongMaterial({ color: 0xffccaa });
 
-  const leftInnerEar = new THREE.Mesh(innerEarGeometry, innerEarMaterial);
-  leftInnerEar.position.set(-0.1, 0.32, 0.39);
-  leftInnerEar.rotation.set(-0.5, 0, -0.2);
-  foxGroup.add(leftInnerEar);
+  const leftInner = new THREE.Mesh(innerEarGeometry, innerEarMaterial);
+  leftInner.position.set(-0.1, 0.32, 0.39);
+  leftInner.rotation.set(-0.5, 0, -0.2);
+  foxGroup.add(leftInner);
 
-  const rightInnerEar = new THREE.Mesh(innerEarGeometry, innerEarMaterial);
-  rightInnerEar.position.set(0.1, 0.32, 0.39);
-  rightInnerEar.rotation.set(-0.5, 0, 0.2);
-  foxGroup.add(rightInnerEar);
+  const rightInner = new THREE.Mesh(innerEarGeometry, innerEarMaterial);
+  rightInner.position.set(0.1, 0.32, 0.39);
+  rightInner.rotation.set(-0.5, 0, 0.2);
+  foxGroup.add(rightInner);
 
-  // Cola
-  // Cola
-const tailGeometry = new THREE.ConeGeometry(0.12, 0.6, 8);
-const tailMaterial = new THREE.MeshPhongMaterial({ color: 0xdd4400 });
-const tail = new THREE.Mesh(tailGeometry, tailMaterial);
-tail.position.set(0, 0.2, -0.45);
-tail.rotation.x = Math.PI / 4;
-foxGroup.add(tail);
+  const tail = new THREE.Mesh(
+    new THREE.ConeGeometry(0.12, 0.6, 8),
+    new THREE.MeshPhongMaterial({ color: 0xdd4400 })
+  );
+  tail.position.set(0, 0.2, -0.45);
+  tail.rotation.x = Math.PI / 4;
+  foxGroup.add(tail);
 
-// Punta de la cola corregida
-const tailTipGeometry = new THREE.SphereGeometry(0.05, 8, 8);
-const tailTipMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff });
-const tailTip = new THREE.Mesh(tailTipGeometry, tailTipMaterial);
-tailTip.position.set(0, 0.48, -0.73);  // <- corregido aquí
-foxGroup.add(tailTip);
+  const tailTip = new THREE.Mesh(
+    new THREE.SphereGeometry(0.05, 8, 8),
+    new THREE.MeshPhongMaterial({ color: 0xffffff })
+  );
+  tailTip.position.set(0, 0.48, -0.73);
+  foxGroup.add(tailTip);
 
-  // Patas
   const legGeometry = new THREE.CylinderGeometry(0.04, 0.04, 0.2);
-  const legMaterial = new THREE.MeshPhongMaterial({ color: 0x8B4513 });
   const hoofGeometry = new THREE.SphereGeometry(0.05, 8, 8);
-  const hoofMaterial = new THREE.MeshPhongMaterial({ color: 0x444444 });
+  const legMat = new THREE.MeshPhongMaterial({ color: 0x8B4513 });
+  const hoofMat = new THREE.MeshPhongMaterial({ color: 0x444444 });
 
-  const legPositions = [
-    [-0.15, -0.05, 0.3],
-    [0.15, -0.05, 0.3],
-    [-0.15, -0.05, -0.3],
-    [0.15, -0.05, -0.3]
-  ];
-
-  legPositions.forEach(pos => {
-    const leg = new THREE.Mesh(legGeometry, legMaterial);
-    leg.position.set(pos[0], pos[1], pos[2]);
+  [
+    [-0.15, -0.05, 0.3], [0.15, -0.05, 0.3],
+    [-0.15, -0.05, -0.3], [0.15, -0.05, -0.3]
+  ].forEach(pos => {
+    const leg = new THREE.Mesh(legGeometry, legMat);
+    leg.position.set(...pos);
     foxGroup.add(leg);
-
-    const hoof = new THREE.Mesh(hoofGeometry, hoofMaterial);
+    const hoof = new THREE.Mesh(hoofGeometry, hoofMat);
     hoof.position.set(pos[0], -0.15, pos[2]);
     foxGroup.add(hoof);
   });
 
-  // Ojos
-  const eyeGeometry = new THREE.SphereGeometry(0.03, 8, 8);
-  const eyeMaterial = new THREE.MeshPhongMaterial({ color: 0x000000 });
+  const eyeGeo = new THREE.SphereGeometry(0.03, 8, 8);
+  const eyeMat = new THREE.MeshPhongMaterial({ color: 0x000000 });
 
-  const leftEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
+  const leftEye = new THREE.Mesh(eyeGeo, eyeMat);
   leftEye.position.set(-0.07, 0.25, 0.55);
   foxGroup.add(leftEye);
 
-  const rightEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
+  const rightEye = new THREE.Mesh(eyeGeo, eyeMat);
   rightEye.position.set(0.07, 0.25, 0.55);
   foxGroup.add(rightEye);
 
   foxModel = foxGroup;
-  console.log('Zorro corregido y listo');
+  createFox.model = foxModel;
 }
 
+// ----- Conejo -----
+function createRabbit() {
+  const group = new THREE.Group();
 
+  const body = new THREE.Mesh(
+    new THREE.SphereGeometry(0.2, 16, 16),
+    new THREE.MeshPhongMaterial({ color: 0xffffff })
+  );
+  body.position.set(0, 0.1, 0);
+  group.add(body);
 
-function onSelect() {
-  if (reticle.visible && foxModel) {
-    const foxClone = foxModel.clone();
-    foxClone.position.setFromMatrixPosition(reticle.matrix);
-    foxClone.quaternion.setFromRotationMatrix(reticle.matrix);
-    scene.add(foxClone);
-    console.log('Zorro colocado en la escena');
-  }
+  const earGeo = new THREE.CylinderGeometry(0.03, 0.03, 0.2, 8);
+  const earMat = new THREE.MeshPhongMaterial({ color: 0xffcccc });
+
+  const leftEar = new THREE.Mesh(earGeo, earMat);
+  leftEar.position.set(-0.05, 0.3, 0);
+  group.add(leftEar);
+
+  const rightEar = new THREE.Mesh(earGeo, earMat);
+  rightEar.position.set(0.05, 0.3, 0);
+  group.add(rightEar);
+
+  rabbitModel = group;
+  createRabbit.model = rabbitModel;
 }
 
-function animate() {
-  renderer.setAnimationLoop(render);
-}
+// ----- Pájaro -----
+function createBird() {
+  const group = new THREE.Group();
 
-function render(timestamp, frame) {
-  if (frame) {
-    const referenceSpace = renderer.xr.getReferenceSpace();
-    const session = renderer.xr.getSession();
-    
-    if (!hitTestSourceRequested) {
-      session.requestReferenceSpace('viewer').then((refSpace) => {
-        session.requestHitTestSource({ space: refSpace }).then((source) => {
-          hitTestSource = source;
-        });
-      });
-      
-      session.addEventListener('end', () => {
-        hitTestSourceRequested = false;
-        hitTestSource = null;
-      });
-      
-      hitTestSourceRequested = true;
-    }
-    
-    if (hitTestSource) {
-      const hitTestResults = frame.getHitTestResults(hitTestSource);
-      
-      if (hitTestResults.length) {
-        const hit = hitTestResults[0];
-        const pose = hit.getPose(referenceSpace);
-        
-        reticle.visible = true;
-        reticle.matrix.fromArray(pose.transform.matrix);
-      } else {
-        reticle.visible = false;
-      }
-    }
-  }
-  
-  renderer.render(scene, camera);
+  const body = new THREE.Mesh(
+    new THREE.SphereGeometry(0.15, 16, 16),
+    new THREE.MeshPhongMaterial({ color: 0x66ccff })
+  );
+  body.position.set(0, 0.1, 0);
+  group.add(body);
+
+  const beak = new THREE.Mesh(
+    new THREE.ConeGeometry(0.03, 0.1, 8),
+    new THREE.MeshPhongMaterial({ color: 0xffaa00 })
+  );
+  beak.rotation.x = Math.PI / 2;
+  beak.position.set(0, 0.1, 0.18);
+  group.add(beak);
+
+  birdModel = group;
+  createBird.model = birdModel;
 }
