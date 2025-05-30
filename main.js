@@ -50,25 +50,25 @@ function init() {
 }
 
 function createFox() {
-  console.log('Creando zorro mejorado');
+  console.log('Creando zorro mejorado (con cuerpo alineado y punta de cola ajustada)');
 
   const foxGroup = new THREE.Group();
 
-  // Cuerpo cilíndrico
+  // Cuerpo cilíndrico alineado a lo largo (rotado en el eje Y)
   const bodyGeometry = new THREE.CylinderGeometry(0.2, 0.25, 0.8, 16);
   const bodyMaterial = new THREE.MeshPhongMaterial({ color: 0xcc5500 });
   const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
-  body.rotation.z = Math.PI / 2;
+  body.rotation.x = Math.PI / 2; // Apunta hacia adelante
   body.position.set(0, 0.1, 0);
   foxGroup.add(body);
 
-  // Cabeza más baja y conectada
+  // Cabeza
   const headGeometry = new THREE.BoxGeometry(0.25, 0.25, 0.3);
   const head = new THREE.Mesh(headGeometry, bodyMaterial);
   head.position.set(0, 0.21, 0.42);
   foxGroup.add(head);
 
-  // Hocico suavizado
+  // Hocico
   const snoutGeometry = new THREE.BoxGeometry(0.12, 0.1, 0.2);
   const snoutMaterial = new THREE.MeshPhongMaterial({ color: 0xffddb3 });
   const snout = new THREE.Mesh(snoutGeometry, snoutMaterial);
@@ -82,7 +82,7 @@ function createFox() {
   nose.position.set(0, 0.2, 0.72);
   foxGroup.add(nose);
 
-  // Orejas con inclinación
+  // Orejas
   const earGeometry = new THREE.ConeGeometry(0.08, 0.2, 6);
   const earMaterial = new THREE.MeshPhongMaterial({ color: 0xdd4400 });
 
@@ -110,7 +110,7 @@ function createFox() {
   rightInnerEar.rotation.set(-0.5, 0, 0.2);
   foxGroup.add(rightInnerEar);
 
-  // Cola con mejor pose
+  // Cola
   const tailGeometry = new THREE.ConeGeometry(0.12, 0.6, 8);
   const tailMaterial = new THREE.MeshPhongMaterial({ color: 0xdd4400 });
   const tail = new THREE.Mesh(tailGeometry, tailMaterial);
@@ -118,16 +118,16 @@ function createFox() {
   tail.rotation.x = Math.PI / 4;
   foxGroup.add(tail);
 
-  const tailTipGeometry = new THREE.SphereGeometry(0.08, 8, 8);
+  // Punta de la cola más pequeña
+  const tailTipGeometry = new THREE.SphereGeometry(0.05, 8, 8);  // REDUCIDA de 0.08 a 0.05
   const tailTipMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff });
   const tailTip = new THREE.Mesh(tailTipGeometry, tailTipMaterial);
-  tailTip.position.set(0, 0.4, -0.75);
+  tailTip.position.set(0, 0.34, -0.68);  // ajustada levemente
   foxGroup.add(tailTip);
 
-  // Patas más hundidas y realistas
+  // Patas
   const legGeometry = new THREE.CylinderGeometry(0.04, 0.04, 0.2);
   const legMaterial = new THREE.MeshPhongMaterial({ color: 0x8B4513 });
-
   const hoofGeometry = new THREE.SphereGeometry(0.05, 8, 8);
   const hoofMaterial = new THREE.MeshPhongMaterial({ color: 0x444444 });
 
@@ -148,7 +148,7 @@ function createFox() {
     foxGroup.add(hoof);
   });
 
-  // Ojos más expresivos
+  // Ojos
   const eyeGeometry = new THREE.SphereGeometry(0.03, 8, 8);
   const eyeMaterial = new THREE.MeshPhongMaterial({ color: 0x000000 });
 
@@ -161,8 +161,9 @@ function createFox() {
   foxGroup.add(rightEye);
 
   foxModel = foxGroup;
-  console.log('Zorro mejorado y listo');
+  console.log('Zorro corregido y listo');
 }
+
 
 
 function onSelect() {
