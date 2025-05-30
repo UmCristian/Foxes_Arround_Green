@@ -54,13 +54,14 @@ function createFox() {
 
   const foxGroup = new THREE.Group();
 
-  // Cuerpo cilíndrico alineado a lo largo (rotado en el eje Y)
-  const bodyGeometry = new THREE.CylinderGeometry(0.2, 0.25, 0.8, 16);
-  const bodyMaterial = new THREE.MeshPhongMaterial({ color: 0xcc5500 });
-  const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
-  body.rotation.x = Math.PI / 2; // Apunta hacia adelante
-  body.position.set(0, 0.1, 0);
-  foxGroup.add(body);
+  // Cuerpo cilíndrico alineado a lo largo (más delgado)
+const bodyGeometry = new THREE.CylinderGeometry(0.12, 0.15, 0.8, 16);
+const bodyMaterial = new THREE.MeshPhongMaterial({ color: 0xcc5500 });
+const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+body.rotation.x = Math.PI / 2;
+body.position.set(0, 0.1, 0);
+foxGroup.add(body);
+
 
   // Cabeza
   const headGeometry = new THREE.BoxGeometry(0.25, 0.25, 0.3);
