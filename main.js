@@ -1,14 +1,12 @@
-import * as THREE from 'https://unpkg.com/three@0.150.1/build/three.module.js';
-import { ARButton } from 'https://unpkg.com/three@0.150.1/examples/jsm/webxr/ARButton.js';
-import { GLTFLoader } from 'https://unpkg.com/three@0.150.1/examples/jsm/loaders/GLTFLoader.js';
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.module.js';
+import { ARButton } from 'https://cdn.jsdelivr.net/npm/three@0.150.1/examples/jsm/webxr/ARButton.js';
 
 let camera, scene, renderer;
 let controller;
 let reticle;
 let hitTestSource = null;
 let hitTestSourceRequested = false;
-let foxModel = null; // Variable para almacenar el modelo cargado
-const loader = new GLTFLoader(); // Instancia del loader
+let foxModel = null;
 
 init();
 animate();
@@ -32,7 +30,6 @@ function init() {
   light.position.set(0.5, 1, 0.25);
   scene.add(light);
   
-  // Agregar luz direccional para mejor iluminación del modelo
   const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
   directionalLight.position.set(0, 1, 0);
   scene.add(directionalLight);
@@ -48,54 +45,113 @@ function init() {
   reticle.visible = false;
   scene.add(reticle);
   
-  // Cargar el modelo del zorro
-  loadFoxModel();
+  // Cargar el GLTFLoader de forma dinámica
+  loadGLTFLoader();
 }
 
-function loadFoxModel() {
-  loader.load(
-    './Fox.glb', // Ruta al archivo GLB
-    function (gltf) {
-      foxModel = gltf.scene;
-      console.log('Modelo del zorro cargado exitosamente');
-      
-      // Opcional: Ajustar el tamaño del modelo si es necesario
-      foxModel.scale.set(0.5, 0.5, 0.5); // Escala el modelo al 50%
-      
-      // Opcional: Si el modelo tiene animaciones, puedes configurarlas aquí
-      if (gltf.animations && gltf.animations.length > 0) {
-        const mixer = new THREE.AnimationMixer(foxModel);
-        const action = mixer.clipAction(gltf.animations[0]);
-        action.play();
-        
-        // Necesitarías actualizar el mixer en el loop de animación
-        // mixer.update(deltaTime);
+async function loadGLTFLoader() {
+  try {
+    // Cargar GLTFLoader dinámicamente
+    const GLTFLoaderModule = await import('https://cdn.jsdelivr.net/npm/three@0.150.1/examples/jsm/loaders/GLTFLoader.js');
+    const GLTFLoader = GLTFLoaderModule.GLTFLoader;
+    
+    const loader = new GLTFLoader();
+    
+    loader.load(
+      './Fox.glb',
+      function (gltf) {
+        foxModel = gltf.scene;
+        console.log('Zorro cargado correctamente');
+        foxModel.scale.set(0.5, 0.5, 0.5);
+      },
+      function (progress) {
+        console.log('Cargando zorro...', Math.round((progress.loaded / progress.total) * 100) + '%');
+      },
+      function (error) {
+        console.error('Error cargando el zorro:', error);
+        // Si falla, crear un zorro simple con geometrías básicas
+        createSimpleFox();
       }
-    },
-    function (progress) {
-      console.log('Progreso de carga:', (progress.loaded / progress.total * 100) + '%');
-    },
-    function (error) {
-      console.error('Error cargando el modelo:', error);
-    }
-  );
+    );
+  } catch (error) {
+    console.error('Error cargando GLTFLoader:', error);
+    // Si no se puede cargar el GLTFLoader, crear un zorro simple
+    createSimpleFox();
+  }
+}
+
+function createSimpleFox() {
+  console.log('Creando zorro simple con geometrías básicas');
+  
+  const foxGroup = new THREE.Group();
+  
+  // Cuerpo del zorro
+  const bodyGeometry = new THREE.BoxGeometry(0.3, 0.15, 0.6);
+  const bodyMaterial = new THREE.MeshPhongMaterial({ color: 0xff6600 });
+  const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+  body.position.set(0, 0.075, 0);
+  foxGroup.add(body);
+  
+  // Cabeza del zorro
+  const headGeometry = new THREE.BoxGeometry(0.2, 0.2, 0.25);
+  const head = new THREE.Mesh(headGeometry, bodyMaterial);
+  head.position.set(0, 0.175, 0.35);
+  foxGroup.add(head);
+  
+  // Hocico
+  const snoutGeometry = new THREE.BoxGeometry(0.1, 0.08, 0.15);
+  const snout = new THREE.Mesh(snoutGeometry, bodyMaterial);
+  snout.position.set(0, 0.15, 0.47);
+  foxGroup.add(snout);
+  
+  // Orejas
+  const earGeometry = new THREE.ConeGeometry(0.06, 0.15, 4);
+  const leftEar = new THREE.Mesh(earGeometry, bodyMaterial);
+  leftEar.position.set(-0.08, 0.28, 0.32);
+  foxGroup.add(leftEar);
+  
+  const rightEar = new THREE.Mesh(earGeometry, bodyMaterial);
+  rightEar.position.set(0.08, 0.28, 0.32);
+  foxGroup.add(rightEar);
+  
+  // Cola
+  const tailGeometry = new THREE.ConeGeometry(0.08, 0.4, 8);
+  const tailMaterial = new THREE.MeshPhongMaterial({ color: 0xff4400 });
+  const tail = new THREE.Mesh(tailGeometry, tailMaterial);
+  tail.position.set(0, 0.1, -0.35);
+  tail.rotation.x = Math.PI / 4;
+  foxGroup.add(tail);
+  
+  // Patas
+  const legGeometry = new THREE.CylinderGeometry(0.03, 0.03, 0.15);
+  const legMaterial = new THREE.MeshPhongMaterial({ color: 0x8B4513 });
+  
+  const positions = [
+    [-0.12, -0.075, 0.2],   // pata delantera izquierda
+    [0.12, -0.075, 0.2],    // pata delantera derecha
+    [-0.12, -0.075, -0.2],  // pata trasera izquierda
+    [0.12, -0.075, -0.2]    // pata trasera derecha
+  ];
+  
+  positions.forEach(pos => {
+    const leg = new THREE.Mesh(legGeometry, legMaterial);
+    leg.position.set(pos[0], pos[1], pos[2]);
+    foxGroup.add(leg);
+  });
+  
+  foxModel = foxGroup;
+  console.log('Zorro simple creado');
 }
 
 function onSelect() {
   if (reticle.visible && foxModel) {
-    // Clonar el modelo para crear una nueva instancia
     const foxClone = foxModel.clone();
-    
-    // Posicionar el zorro en la ubicación del reticle
     foxClone.position.setFromMatrixPosition(reticle.matrix);
     foxClone.quaternion.setFromRotationMatrix(reticle.matrix);
-    
-    // Agregar el zorro a la escena
     scene.add(foxClone);
-    
     console.log('Zorro colocado en la escena');
   } else if (reticle.visible && !foxModel) {
-    console.log('El modelo del zorro aún no se ha cargado');
+    console.log('El zorro aún no está listo');
   }
 }
 
