@@ -45,123 +45,124 @@ function init() {
   reticle.visible = false;
   scene.add(reticle);
   
-  // Cargar el GLTFLoader de forma dinámica
-  loadGLTFLoader();
+  // Crear el zorro directamente
+  createFox();
 }
 
-async function loadGLTFLoader() {
-  try {
-    // Cargar GLTFLoader dinámicamente
-    const GLTFLoaderModule = await import('https://cdn.jsdelivr.net/npm/three@0.150.1/examples/jsm/loaders/GLTFLoader.js');
-    const GLTFLoader = GLTFLoaderModule.GLTFLoader;
-    
-    const loader = new GLTFLoader();
-    
-    console.log('Intentando cargar Fox.glb...');
-    
-    loader.load(
-      './Fox.glb',
-      function (gltf) {
-        console.log('¡ÉXITO! Fox.glb cargado correctamente:', gltf);
-        foxModel = gltf.scene;
-        foxModel.scale.set(0.5, 0.5, 0.5);
-        console.log('Modelo del zorro listo para usar');
-      },
-      function (progress) {
-        console.log('Progreso carga Fox.glb:', Math.round((progress.loaded / progress.total) * 100) + '%');
-      },
-      function (error) {
-        console.error('ERROR cargando Fox.glb:', error);
-        console.error('Detalles del error:', error.message || error);
-        
-        // Probar otras rutas posibles
-        console.log('Probando ruta alternativa: Fox.glb (sin ./)');
-        loader.load(
-          'Fox.glb',
-          function (gltf) {
-            console.log('¡ÉXITO con ruta alternativa!');
-            foxModel = gltf.scene;
-            foxModel.scale.set(0.5, 0.5, 0.5);
-          },
-          function (progress) {
-            console.log('Progreso ruta alternativa:', Math.round((progress.loaded / progress.total) * 100) + '%');
-          },
-          function (error2) {
-            console.error('También falló la ruta alternativa:', error2);
-            console.log('Creando zorro simple como fallback');
-            createSimpleFox();
-          }
-        );
-      }
-    );
-  } catch (error) {
-    console.error('Error cargando GLTFLoader:', error);
-    // Si no se puede cargar el GLTFLoader, crear un zorro simple
-    createSimpleFox();
-  }
-}
-
-function createSimpleFox() {
-  console.log('Creando zorro simple con geometrías básicas');
+function createFox() {
+  console.log('Creando zorro con geometrías básicas');
   
   const foxGroup = new THREE.Group();
   
-  // Cuerpo del zorro
-  const bodyGeometry = new THREE.BoxGeometry(0.3, 0.15, 0.6);
+  // Cuerpo principal (más realista)
+  const bodyGeometry = new THREE.BoxGeometry(0.4, 0.2, 0.8);
   const bodyMaterial = new THREE.MeshPhongMaterial({ color: 0xff6600 });
   const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
-  body.position.set(0, 0.075, 0);
+  body.position.set(0, 0.1, 0);
   foxGroup.add(body);
   
-  // Cabeza del zorro
-  const headGeometry = new THREE.BoxGeometry(0.2, 0.2, 0.25);
+  // Cabeza más proporcionada
+  const headGeometry = new THREE.BoxGeometry(0.25, 0.25, 0.3);
   const head = new THREE.Mesh(headGeometry, bodyMaterial);
-  head.position.set(0, 0.175, 0.35);
+  head.position.set(0, 0.225, 0.45);
   foxGroup.add(head);
   
-  // Hocico
-  const snoutGeometry = new THREE.BoxGeometry(0.1, 0.08, 0.15);
-  const snout = new THREE.Mesh(snoutGeometry, bodyMaterial);
-  snout.position.set(0, 0.15, 0.47);
+  // Hocico más alargado
+  const snoutGeometry = new THREE.BoxGeometry(0.12, 0.1, 0.2);
+  const snoutMaterial = new THREE.MeshPhongMaterial({ color: 0xffaa77 });
+  const snout = new THREE.Mesh(snoutGeometry, snoutMaterial);
+  snout.position.set(0, 0.2, 0.65);
   foxGroup.add(snout);
   
-  // Orejas
-  const earGeometry = new THREE.ConeGeometry(0.06, 0.15, 4);
-  const leftEar = new THREE.Mesh(earGeometry, bodyMaterial);
-  leftEar.position.set(-0.08, 0.28, 0.32);
+  // Nariz negra
+  const noseGeometry = new THREE.SphereGeometry(0.025, 8, 8);
+  const noseMaterial = new THREE.MeshPhongMaterial({ color: 0x000000 });
+  const nose = new THREE.Mesh(noseGeometry, noseMaterial);
+  nose.position.set(0, 0.22, 0.75);
+  foxGroup.add(nose);
+  
+  // Orejas más grandes y puntiagudas
+  const earGeometry = new THREE.ConeGeometry(0.08, 0.2, 6);
+  const earMaterial = new THREE.MeshPhongMaterial({ color: 0xff4400 });
+  
+  const leftEar = new THREE.Mesh(earGeometry, earMaterial);
+  leftEar.position.set(-0.1, 0.35, 0.4);
+  leftEar.rotation.z = -0.2;
   foxGroup.add(leftEar);
   
-  const rightEar = new THREE.Mesh(earGeometry, bodyMaterial);
-  rightEar.position.set(0.08, 0.28, 0.32);
+  const rightEar = new THREE.Mesh(earGeometry, earMaterial);
+  rightEar.position.set(0.1, 0.35, 0.4);
+  rightEar.rotation.z = 0.2;
   foxGroup.add(rightEar);
   
-  // Cola
-  const tailGeometry = new THREE.ConeGeometry(0.08, 0.4, 8);
+  // Interior de las orejas
+  const innerEarGeometry = new THREE.ConeGeometry(0.04, 0.12, 6);
+  const innerEarMaterial = new THREE.MeshPhongMaterial({ color: 0xffccaa });
+  
+  const leftInnerEar = new THREE.Mesh(innerEarGeometry, innerEarMaterial);
+  leftInnerEar.position.set(-0.1, 0.32, 0.42);
+  leftInnerEar.rotation.z = -0.2;
+  foxGroup.add(leftInnerEar);
+  
+  const rightInnerEar = new THREE.Mesh(innerEarGeometry, innerEarMaterial);
+  rightInnerEar.position.set(0.1, 0.32, 0.42);
+  rightInnerEar.rotation.z = 0.2;
+  foxGroup.add(rightInnerEar);
+  
+  // Cola más peluda y realista
+  const tailGeometry = new THREE.ConeGeometry(0.12, 0.6, 8);
   const tailMaterial = new THREE.MeshPhongMaterial({ color: 0xff4400 });
   const tail = new THREE.Mesh(tailGeometry, tailMaterial);
-  tail.position.set(0, 0.1, -0.35);
-  tail.rotation.x = Math.PI / 4;
+  tail.position.set(0, 0.15, -0.5);
+  tail.rotation.x = Math.PI / 6;
   foxGroup.add(tail);
   
-  // Patas
-  const legGeometry = new THREE.CylinderGeometry(0.03, 0.03, 0.15);
+  // Punta blanca de la cola
+  const tailTipGeometry = new THREE.SphereGeometry(0.08, 8, 8);
+  const tailTipMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff });
+  const tailTip = new THREE.Mesh(tailTipGeometry, tailTipMaterial);
+  tailTip.position.set(0, 0.35, -0.7);
+  foxGroup.add(tailTip);
+  
+  // Patas más realistas
+  const legGeometry = new THREE.CylinderGeometry(0.04, 0.04, 0.2);
   const legMaterial = new THREE.MeshPhongMaterial({ color: 0x8B4513 });
   
-  const positions = [
-    [-0.12, -0.075, 0.2],   // pata delantera izquierda
-    [0.12, -0.075, 0.2],    // pata delantera derecha
-    [-0.12, -0.075, -0.2],  // pata trasera izquierda
-    [0.12, -0.075, -0.2]    // pata trasera derecha
+  // Pezuñas
+  const hoofGeometry = new THREE.SphereGeometry(0.05, 8, 8);
+  const hoofMaterial = new THREE.MeshPhongMaterial({ color: 0x444444 });
+  
+  const legPositions = [
+    [-0.15, 0, 0.3],    // delantera izquierda
+    [0.15, 0, 0.3],     // delantera derecha
+    [-0.15, 0, -0.3],   // trasera izquierda
+    [0.15, 0, -0.3]     // trasera derecha
   ];
   
-  positions.forEach(pos => {
+  legPositions.forEach(pos => {
     const leg = new THREE.Mesh(legGeometry, legMaterial);
     leg.position.set(pos[0], pos[1], pos[2]);
     foxGroup.add(leg);
+    
+    const hoof = new THREE.Mesh(hoofGeometry, hoofMaterial);
+    hoof.position.set(pos[0], -0.08, pos[2]);
+    foxGroup.add(hoof);
   });
   
+  // Ojos
+  const eyeGeometry = new THREE.SphereGeometry(0.03, 8, 8);
+  const eyeMaterial = new THREE.MeshPhongMaterial({ color: 0x000000 });
+  
+  const leftEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
+  leftEye.position.set(-0.08, 0.25, 0.58);
+  foxGroup.add(leftEye);
+  
+  const rightEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
+  rightEye.position.set(0.08, 0.25, 0.58);
+  foxGroup.add(rightEye);
+  
   foxModel = foxGroup;
-  console.log('Zorro simple creado');
+  console.log('Zorro creado y listo para usar');
 }
 
 function onSelect() {
@@ -171,8 +172,6 @@ function onSelect() {
     foxClone.quaternion.setFromRotationMatrix(reticle.matrix);
     scene.add(foxClone);
     console.log('Zorro colocado en la escena');
-  } else if (reticle.visible && !foxModel) {
-    console.log('El zorro aún no está listo');
   }
 }
 
