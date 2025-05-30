@@ -7,9 +7,30 @@
   <style>
     body { margin: 0; font-family: sans-serif; }
     canvas { display: block; }
+    #animalSelector {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 999;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 10px;
+      border-radius: 8px;
+    }
+    #animalSelector button {
+      margin: 2px;
+      padding: 6px 10px;
+      font-size: 16px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
+  <div id="animalSelector">
+    <button onclick="setAnimal('fox')">🦊 Zorro</button>
+    <button onclick="setAnimal('rabbit')">🐇 Conejo</button>
+    <button onclick="setAnimal('bird')">🐦 Pájaro</button>
+  </div>
+
   <script type="module" src="main.js"></script>
 </body>
 </html>
