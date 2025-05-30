@@ -220,27 +220,79 @@ function createFox() {
   createFox.model = foxModel;
 }
 
-// ----- Conejo -----
+// ----- conejo ----
 function createRabbit() {
   const group = new THREE.Group();
 
+  const colorBody = 0xede6d1;
+  const colorEar = 0xe4d5ba;
+
+  // Cuerpo
   const body = new THREE.Mesh(
-    new THREE.SphereGeometry(0.2, 16, 16),
-    new THREE.MeshPhongMaterial({ color: 0xffffff })
+    new THREE.BoxGeometry(0.25, 0.2, 0.35),
+    new THREE.MeshPhongMaterial({ color: colorBody })
   );
   body.position.set(0, 0.1, 0);
   group.add(body);
 
-  const earGeo = new THREE.CylinderGeometry(0.03, 0.03, 0.2, 8);
-  const earMat = new THREE.MeshPhongMaterial({ color: 0xffcccc });
+  // Cabeza
+  const head = new THREE.Mesh(
+    new THREE.BoxGeometry(0.2, 0.2, 0.2),
+    new THREE.MeshPhongMaterial({ color: colorBody })
+  );
+  head.position.set(0, 0.2, 0.275);
+  group.add(head);
 
-  const leftEar = new THREE.Mesh(earGeo, earMat);
-  leftEar.position.set(-0.05, 0.3, 0);
+  // Orejas
+  const earGeo = new THREE.BoxGeometry(0.05, 0.18, 0.05);
+  const leftEar = new THREE.Mesh(earGeo, new THREE.MeshPhongMaterial({ color: colorEar }));
+  leftEar.position.set(-0.05, 0.33, 0.29);
   group.add(leftEar);
 
-  const rightEar = new THREE.Mesh(earGeo, earMat);
-  rightEar.position.set(0.05, 0.3, 0);
+  const rightEar = new THREE.Mesh(earGeo, new THREE.MeshPhongMaterial({ color: colorEar }));
+  rightEar.position.set(0.05, 0.33, 0.29);
   group.add(rightEar);
+
+  // Patas (delanteras)
+  const legGeo = new THREE.BoxGeometry(0.05, 0.1, 0.05);
+  const legMat = new THREE.MeshPhongMaterial({ color: colorBody });
+
+  const frontLeftLeg = new THREE.Mesh(legGeo, legMat);
+  frontLeftLeg.position.set(-0.08, 0.03, 0.2);
+  group.add(frontLeftLeg);
+
+  const frontRightLeg = new THREE.Mesh(legGeo, legMat);
+  frontRightLeg.position.set(0.08, 0.03, 0.2);
+  group.add(frontRightLeg);
+
+  // Patas (traseras)
+  const backLeftLeg = new THREE.Mesh(legGeo, legMat);
+  backLeftLeg.position.set(-0.08, 0.03, -0.1);
+  group.add(backLeftLeg);
+
+  const backRightLeg = new THREE.Mesh(legGeo, legMat);
+  backRightLeg.position.set(0.08, 0.03, -0.1);
+  group.add(backRightLeg);
+
+  // Ojos
+  const eyeGeo = new THREE.BoxGeometry(0.03, 0.03, 0.01);
+  const eyeMat = new THREE.MeshPhongMaterial({ color: 0x000000 });
+
+  const leftEye = new THREE.Mesh(eyeGeo, eyeMat);
+  leftEye.position.set(-0.06, 0.23, 0.36);
+  group.add(leftEye);
+
+  const rightEye = new THREE.Mesh(eyeGeo, eyeMat);
+  rightEye.position.set(0.06, 0.23, 0.36);
+  group.add(rightEye);
+
+  // Nariz
+  const nose = new THREE.Mesh(
+    new THREE.BoxGeometry(0.02, 0.02, 0.01),
+    new THREE.MeshPhongMaterial({ color: 0x8b4b28 })
+  );
+  nose.position.set(0, 0.19, 0.38);
+  group.add(nose);
 
   rabbitModel = group;
   createRabbit.model = rabbitModel;
@@ -250,20 +302,76 @@ function createRabbit() {
 function createBird() {
   const group = new THREE.Group();
 
+  const colorBody = 0xffffff;
+  const colorBeak = 0xffaa00;
+  const colorWattle = 0xcc3333;
+
+  // Cuerpo (cubito principal)
   const body = new THREE.Mesh(
-    new THREE.SphereGeometry(0.15, 16, 16),
-    new THREE.MeshPhongMaterial({ color: 0x66ccff })
+    new THREE.BoxGeometry(0.25, 0.25, 0.25),
+    new THREE.MeshPhongMaterial({ color: colorBody })
   );
-  body.position.set(0, 0.1, 0);
+  body.position.set(0, 0.15, 0);
   group.add(body);
 
-  const beak = new THREE.Mesh(
-    new THREE.ConeGeometry(0.03, 0.1, 8),
-    new THREE.MeshPhongMaterial({ color: 0xffaa00 })
+  // Cabeza (más pequeña)
+  const head = new THREE.Mesh(
+    new THREE.BoxGeometry(0.18, 0.18, 0.18),
+    new THREE.MeshPhongMaterial({ color: colorBody })
   );
-  beak.rotation.x = Math.PI / 2;
-  beak.position.set(0, 0.1, 0.18);
+  head.position.set(0, 0.27, 0.18);
+  group.add(head);
+
+  // Pico (naranja)
+  const beak = new THREE.Mesh(
+    new THREE.BoxGeometry(0.06, 0.04, 0.02),
+    new THREE.MeshPhongMaterial({ color: colorBeak })
+  );
+  beak.position.set(0, 0.25, 0.29);
   group.add(beak);
+
+  // Papada (roja debajo del pico)
+  const wattle = new THREE.Mesh(
+    new THREE.BoxGeometry(0.02, 0.04, 0.02),
+    new THREE.MeshPhongMaterial({ color: colorWattle })
+  );
+  wattle.position.set(0, 0.22, 0.27);
+  group.add(wattle);
+
+  // Ojos (negros)
+  const eyeGeo = new THREE.BoxGeometry(0.02, 0.02, 0.01);
+  const eyeMat = new THREE.MeshPhongMaterial({ color: 0x000000 });
+
+  const leftEye = new THREE.Mesh(eyeGeo, eyeMat);
+  leftEye.position.set(-0.05, 0.29, 0.26);
+  group.add(leftEye);
+
+  const rightEye = new THREE.Mesh(eyeGeo, eyeMat);
+  rightEye.position.set(0.05, 0.29, 0.26);
+  group.add(rightEye);
+
+  // Patas (delgadas)
+  const legGeo = new THREE.BoxGeometry(0.02, 0.08, 0.02);
+  const legMat = new THREE.MeshPhongMaterial({ color: 0xffaa00 });
+
+  const leftLeg = new THREE.Mesh(legGeo, legMat);
+  leftLeg.position.set(-0.05, 0.05, 0);
+  group.add(leftLeg);
+
+  const rightLeg = new THREE.Mesh(legGeo, legMat);
+  rightLeg.position.set(0.05, 0.05, 0);
+  group.add(rightLeg);
+
+  // Pies (planchas)
+  const footGeo = new THREE.BoxGeometry(0.04, 0.01, 0.04);
+
+  const leftFoot = new THREE.Mesh(footGeo, legMat);
+  leftFoot.position.set(-0.05, 0.005, 0);
+  group.add(leftFoot);
+
+  const rightFoot = new THREE.Mesh(footGeo, legMat);
+  rightFoot.position.set(0.05, 0.005, 0);
+  group.add(rightFoot);
 
   birdModel = group;
   createBird.model = birdModel;
