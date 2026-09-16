@@ -54,6 +54,20 @@ function init() {
   createFox();
   createRabbit();
   createBird();
+
+  window.addEventListener('resize', onWindowResize);
+  renderer.xr.addEventListener('sessionend', () => {
+    reticle.visible = false;
+    onWindowResize();
+  });
+}
+
+function onWindowResize() {
+  // Durante AR, WebXR controla el tamaño del framebuffer y la cámara.
+  if (renderer.xr.isPresenting) return;
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
 function onSelect() {
@@ -94,8 +108,8 @@ function render(_, frame) {
       if (hitTestResults.length) {
         const hit = hitTestResults[0];
         const pose = hit.getPose(referenceSpace);
-        reticle.visible = true;
-        reticle.matrix.fromArray(pose.transform.matrix);
+        reticle.visible = pose !== null;
+        if (pose) reticle.matrix.fromArray(pose.transform.matrix);
       } else {
         reticle.visible = false;
       }
