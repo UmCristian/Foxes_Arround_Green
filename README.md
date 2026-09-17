@@ -1,47 +1,75 @@
 # Foxes Arround Green 🦊
 
-Pequeño experimento de realidad aumentada hecho con Three.js y WebXR. La idea es simple: abrir la página desde un celular compatible, detectar una superficie y colocar animales en el mundo real.
+Un pequeño experimento de realidad aumentada hecho con Three.js y WebXR.
+
+La idea es bastante simple: abrir la página desde un celular compatible, detectar una superficie con la cámara y colocar un zorro 3D en el mundo real.
 
 ## Probarlo
 
-La versión publicada está en GitHub Pages:
+La versión publicada está disponible en GitHub Pages:
 
-https://umcristian.github.io/Foxes_Arround_Green/
+[Foxes Arround Green](https://umcristian.github.io/Foxes_Arround_Green/?utm_source=chatgpt.com)
 
-En un dispositivo compatible:
+Para probarla:
 
-1. Pulsa **START AR**.
-2. Permite el acceso a la cámara.
-3. Apunta al suelo o a otra superficie hasta que aparezca el anillo verde.
-4. Elige **Zorro**, **Conejo** o **Pájaro**.
-5. Toca la pantalla para colocar el animal.
+1. Abre la página desde un celular compatible con WebXR.
+2. Pulsa **START AR**.
+3. Permite el acceso a la cámara.
+4. Mueve el celular apuntando al suelo, una mesa u otra superficie.
+5. Cuando aparezca el círculo verde, significa que se encontró una superficie.
+6. Selecciona **🦊 Zorro**.
+7. Toca la pantalla donde quieras colocarlo.
 
-Por ahora el proyecto está centrado principalmente en el zorro. El conejo y el pájaro siguen siendo modelos de prueba.
+Puedes colocar más de un zorro en la misma sesión.
+
+## Animales
+
+Por ahora el proyecto está centrado en el zorro.
+
+* 🦊 **Zorro:** funcional. Utiliza el modelo `Fox.glb`.
+* 🐇 **Conejo:** todavía no implementado.
+* 🐦 **Pájaro:** todavía no implementado.
+
+Los botones del conejo y del pájaro se mantienen porque la idea es añadir sus modelos posteriormente.
 
 ## Ejecutarlo localmente
 
-Con Python 3:
+No es necesario instalar dependencias.
+
+Con Python 3 puedes iniciar un servidor desde la carpeta del proyecto:
 
 ```bash
 python -m http.server 8765
 ```
 
-Después abre `http://localhost:8765`.
+Después abre `localhost:8765` en el navegador.
 
-No abras `index.html` directamente con doble clic, porque los módulos de JavaScript necesitan servirse desde un servidor. Three.js se carga desde jsDelivr, así que también necesitas conexión a Internet.
+Three.js y sus módulos se cargan desde jsDelivr, por lo que se necesita conexión a Internet.
 
 ## Cómo funciona
 
-- **Three.js** se encarga de la escena y los modelos 3D.
-- **WebXR** inicia la experiencia de realidad aumentada.
-- **Hit Test** detecta superficies donde se pueden colocar los animales.
-- **DOM Overlay** mantiene los botones del selector visibles y utilizables mientras AR está activo.
-- No hay backend ni dependencias que instalar.
+El proyecto utiliza:
 
-`Fox.glb` sigue dentro del repositorio, aunque actualmente el zorro que aparece en AR se genera directamente con Three.js.
+* **Three.js** para mostrar y manipular el modelo 3D.
+* **GLTFLoader** para cargar `Fox.glb`.
+* **WebXR** para iniciar la experiencia de realidad aumentada.
+* **Hit Test** para detectar superficies del mundo real.
+* **DOM Overlay** para mantener los botones de animales disponibles mientras AR está activo.
+
+Cuando WebXR encuentra una superficie válida aparece un círculo verde. Al tocar la pantalla, el proyecto crea una copia del zorro y la coloca en esa posición.
+
+## Archivos principales
+
+`index.html` contiene la interfaz y los botones.
+
+`main.js` contiene la escena de Three.js, WebXR, la detección de superficies y la colocación de los modelos.
+
+`Fox.glb` es el modelo 3D utilizado actualmente para el zorro.
 
 ## Compatibilidad
 
-La experiencia AR depende del navegador y del dispositivo. Si aparece **AR NOT SUPPORTED**, significa que ese entorno no ofrece las funciones WebXR que necesita el proyecto.
+WebXR no funciona en todos los navegadores ni en todos los celulares.
 
-Para probar AR desde un celular, la versión de GitHub Pages es la opción más sencilla porque ya se sirve mediante HTTPS.
+Si aparece **AR NOT SUPPORTED**, el navegador o dispositivo no ofrece las funciones de realidad aumentada que necesita el proyecto.
+
+Para probar AR desde un celular es recomendable utilizar directamente la versión publicada en GitHub Pages, ya que WebXR necesita un contexto seguro HTTPS.
