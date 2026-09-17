@@ -8,19 +8,26 @@
     body { margin: 0; font-family: sans-serif; }
     canvas { display: block; }
     #animalSelector {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      z-index: 999;
+      position: fixed;
+      top: max(10px, env(safe-area-inset-top));
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      display: flex;
+      gap: 6px;
       background: rgba(255, 255, 255, 0.9);
-      padding: 10px;
-      border-radius: 8px;
+      padding: 8px;
+      border-radius: 10px;
+      pointer-events: auto;
+      touch-action: manipulation;
+      white-space: nowrap;
     }
     #animalSelector button {
-      margin: 2px;
-      padding: 6px 10px;
-      font-size: 16px;
+      margin: 0;
+      padding: 8px 12px;
+      font-size: 15px;
       cursor: pointer;
+      touch-action: manipulation;
     }
   </style>
 </head>
